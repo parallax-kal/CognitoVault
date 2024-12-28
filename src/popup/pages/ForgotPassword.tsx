@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import PrimaryButton from "@/components/common/primary-button";
 import Logo from "@/components/common/Logo";
 import toast from "react-hot-toast";
-import { sendPasswordResetEmail } from "firebase/auth";
+import { sendPasswordResetEmail } from "firebase/auth/web-extension";
 import { auth } from "@/lib/firebase";
 
 // Define schema for form validation using Zod

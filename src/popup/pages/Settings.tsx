@@ -2,7 +2,10 @@ import Logo from "@/components/common/Logo";
 import { pageAtom, userAtom } from "@/lib/atom";
 import { auth, db } from "@/lib/firebase";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { sendPasswordResetEmail, verifyBeforeUpdateEmail } from "firebase/auth";
+import {
+  sendPasswordResetEmail,
+  verifyBeforeUpdateEmail,
+} from "firebase/auth/web-extension";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { useRecoilState, useSetRecoilState } from "recoil";

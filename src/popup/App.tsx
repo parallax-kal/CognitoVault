@@ -9,10 +9,10 @@ import ExportPage from "./pages/Export";
 import { SyncLoader } from "react-spinners";
 import ProfileIcon from "./icons/profile.svg";
 import { auth, db } from "./lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth/web-extension";
 import { useRecoilState, useSetRecoilState } from "recoil";
 import { pageAtom, userAtom } from "./lib/atom";
-import { signOut } from "firebase/auth";
+import { signOut } from "firebase/auth/web-extension";
 import Settings from "./pages/Settings";
 import { doc, getDoc } from "firebase/firestore";
 import ViewVault from "./pages/ViewVault";
@@ -34,7 +34,7 @@ function App() {
     <Settings />,
     <ViewVault />,
   ];
-  
+
   // State to control the visibility of the navigation menu
   const [showingNav, setShowingNav] = useState(false);
 

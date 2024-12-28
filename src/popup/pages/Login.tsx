@@ -2,7 +2,10 @@ import { useForm } from "react-hook-form";
 import BackIcon from "../icons/back.svg";
 import Logo from "../components/common/Logo";
 import toast from "react-hot-toast";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import {
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth/web-extension";
 import { auth } from "../lib/firebase";
 import { useSetRecoilState } from "recoil";
 import { pageAtom } from "../lib/atom";
@@ -96,9 +99,12 @@ const Login = () => {
             Log In
           </p>
 
-          <button className="mb-5 mt-3" onClick={() => {
-            setPage(0) // go to Landing page
-          }}>
+          <button
+            className="mb-5 mt-3"
+            onClick={() => {
+              setPage(0); // go to Landing page
+            }}
+          >
             <BackIcon className="h-5 w-5" />
           </button>
 

@@ -7,7 +7,7 @@ import { auth, db } from "../lib/firebase";
 import {
   createUserWithEmailAndPassword,
   sendEmailVerification,
-} from "firebase/auth";
+} from "firebase/auth/web-extension";
 import toast from "react-hot-toast";
 import { useSetRecoilState } from "recoil";
 import { pageAtom } from "../lib/atom";
