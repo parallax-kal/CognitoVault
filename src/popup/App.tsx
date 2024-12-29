@@ -68,30 +68,6 @@ function App() {
     });
   }, []);
 
-  // Listener for messages from the Chrome extension
-  chrome.runtime.onMessage.addListener(async (message, _, sendResponse) => {
-    if (message === "check-for-local-storage") {
-      // Query the active tab in the current window
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-
-      // Retrieve localStorage data from the current tab
-      const siteLocalStorageData = localStorage.getItem(tab.url!);
-      if (siteLocalStorageData) {
-        // Parse and set localStorage data if available
-        const { localStorage, path } = JSON.parse(siteLocalStorageData);
-        sendResponse(true);
-        await chrome.runtime.sendMessage({
-          type: "set-local-storage",
-          localStorage: localStorage,
-        });
-      } else {
-        sendResponse(false);
-      }
-    }
-  });
 
   return (
     <div

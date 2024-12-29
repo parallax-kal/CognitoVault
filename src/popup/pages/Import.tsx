@@ -30,7 +30,7 @@ const ImportPage = () => {
   const user = useRecoilValue(userAtom);
 
   // State to track the selected vaults for import
-  const [selectedVaults, setSelectedVaults] = useState<Vault[]>([]);
+  const [selectedVault, setSelectedVault] = useState<Vault>();
 
   // Query to fetch vaults where the user has receipts but hasn't shared
   const vaultsQuery = query(
@@ -40,7 +40,11 @@ const ImportPage = () => {
   );
 
   // Fetch vaults using React Query
-  const { data: vaults, isLoading, refetch } = useQuery<Vault[]>(
+  const {
+    data: vaults,
+    isLoading,
+    refetch,
+  } = useQuery<Vault[]>(
     "import-vaults",
     async () => {
       // Fetch documents from Firestore
@@ -59,47 +63,65 @@ const ImportPage = () => {
       });
     },
     {
-      refetchOnMount: false,  // Disable refetch on mount
-      refetchOnWindowFocus: false,  // Disable refetch on window focus
+      refetchOnMount: false, // Disable refetch on mount
+      refetchOnWindowFocus: false, // Disable refetch on window focus
     }
   );
 
   // Function to import selected vaults
-  const importVaults = async () => {
+  const importVault = async () => {
+    const loadingToast = toast.loading("Importing Vault.");
     try {
-      // Process each selected vault
+      if (!selectedVault) {
+        return toast.error("No selected vault.");
+      }
+      const [tab] = await chrome.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+
+      if (!tab.url) {
+        return toast.error("Can't get the current tab's url")
+      }
+
+      const tabDomain = new URL(tab.url).hostname;
+      const vaultDomain = new URL(selectedVault.url).hostname;
+
+      if (tabDomain !== vaultDomain) {
+          return toast.error("Please go to the domain you're trying to import.");
+      }
+
       await Promise.all(
-        selectedVaults.map(async (vault) => {
-          // Set cookies for the vault
-          await Promise.all(
-            vault.cookies.map(async (cookie) => {
-              return await chrome.cookies.set({
-                url: vault.url,
-                name: cookie.name,
-                value: cookie.value,
-                domain: cookie.domain,
-                path: cookie.path,
-                secure: cookie.secure,
-                httpOnly: cookie.httpOnly,
-                expirationDate: cookie.expirationDate,
-              });
-            })
-          );
-          // Store local storage data
-          localStorage.setItem(
-            vault.url,
-            JSON.stringify(vault.localStorage || {})
-          );
-          // Update Firestore to mark the vault as imported
-          await updateDoc(doc(db, "vaults", vault.id), {
-            imported: arrayUnion(user?.email),
+        selectedVault.cookies.map(async (cookie) => {
+          return await chrome.cookies.set({
+            url: selectedVault.url,
+            name: cookie.name,
+            value: cookie.value,
+            domain: cookie.domain,
+            path: cookie.path,
+            secure: cookie.secure,
+            httpOnly: cookie.httpOnly,
+            expirationDate: cookie.expirationDate,
           });
         })
       );
+      // Store local storage data
+
+      await chrome.storage.local.set({
+        [selectedVault.url]: selectedVault.localStorage || {},
+      });
+
+      // Update Firestore to mark the vault as imported
+      await updateDoc(doc(db, "vaults", selectedVault.id), {
+        imported: arrayUnion(user?.email),
+      });
+      toast.success("Success importing vault.");
       // Refetch vaults to update the list
       refetch();
     } catch (error) {
-      console.error("Error importing vaults: ", error);
+      toast.error("Error importing vault");
+    } finally {
+      toast.dismiss(loadingToast);
     }
   };
 
@@ -117,9 +139,11 @@ const ImportPage = () => {
   return (
     <div className="h-full w-full text-white flex flex-col">
       <div className="flex pt-5 gap-4 grow-0 shrink basis-auto items-center p-3">
-        <button onClick={() => {
-          setPage(4) // navigate to main page
-        }}>
+        <button
+          onClick={() => {
+            setPage(4); // navigate to main page
+          }}
+        >
           <BackIcon className="h-5 w-5" />
         </button>
         <p className="text-xl">Import Vault</p>
@@ -154,14 +178,10 @@ const ImportPage = () => {
                         getAdded={(added) => {
                           if (added) {
                             // Add vault to selectedVaults
-                            setSelectedVaults([...selectedVaults, vault]);
+                            setSelectedVault(vault);
                           } else {
                             // Remove vault from selectedVaults
-                            setSelectedVaults((currentVaults) => {
-                              return currentVaults.filter(
-                                (currentVault) => currentVault !== vault
-                              );
-                            });
+                            setSelectedVault(undefined);
                           }
                         }}
                       />
@@ -174,15 +194,10 @@ const ImportPage = () => {
                 </div>
                 <PrimaryButton
                   title="Import"
-                  disabled={selectedVaults.length === 0}  // Disable button if no vaults selected
+                  disabled={!selectedVault} // Disable button if no vaults selected
                   className="w-[7rem] right-0 absolute bottom-0"
-                  onClick={() => {
-                    // Show toast notification while importing vaults
-                    toast.promise(importVaults(), {
-                      loading: "Importing vaults",
-                      error: "Error importing Vaults",
-                      success: "Vaults Imported",
-                    });
+                  onClick={async () => {
+                    await importVault();
                   }}
                 />
               </TabsContent>

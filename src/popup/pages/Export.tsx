@@ -56,7 +56,7 @@ const ExportPage = () => {
     {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
-      onError: console.log,
+      onError: (value: any) => toast.error(value?.message ?? "Error getting exported vaults."),
     }
   );
 
@@ -66,56 +66,62 @@ const ExportPage = () => {
     refetch(); // Refetch vaults when selectedVault changes
   }, [selectedVault, refetch]);
 
-  // Function to export vault data
   const exportVault = async () => {
-    try {
-      if (receipts.length === 0) {
-        throw new Error("No receipts");
-      }
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (receipts.length === 0) {
+          return reject("No receipts available.");
+        }
 
-      const [tab] = await chrome.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
+        const [tab] = await chrome.tabs.query({
+          active: true,
+          currentWindow: true,
+        });
 
-      const cookies = await chrome.cookies.getAll({ url: tab.url });
+        if (!tab.url || tab.url === "chrome://newtab/") {
+          return reject("You're still on new tab.");
+        }
 
-      const localStorage = await chrome.tabs.sendMessage(
-        tab.id!,
-        "get-local-storage"
-      );
 
-      if (!localStorage && cookies.length === 0) {
-        throw new Error(
-          "No Cookies and local storage data found for this current tab."
+        const cookies = await chrome.cookies.getAll({ url: tab.url });
+
+        const localStorage = await chrome.tabs.sendMessage(
+          tab.id!,
+          "get-local-storage"
         );
+
+        if (Object.keys(localStorage).length === 0 && cookies.length === 0) {
+          return reject(
+            "No Cookies or local storage data found for this current tab."
+          );
+        }
+
+        // Sanitize the domain and localStorage keys
+        const sanitizedDomain = sanitizeKey(new URL(tab.url!).hostname);
+        const sanitizedLocalStorage: Record<string, any> = Object.keys(
+          localStorage
+        ).reduce((acc, key) => {
+          acc[sanitizeKey(key)] = localStorage[key];
+          return acc;
+        }, {} as Record<string, any>);
+
+        // Save the vault data to Firestore
+        await setDoc(doc(collection(db, "vaults")), {
+          domain: sanitizedDomain,
+          cookies,
+          localStorage: sanitizedLocalStorage,
+          receipts,
+          imported: [],
+          sharedBy: user?.email,
+        });
+
+        refetch(); // Refetch vaults after exporting
+
+        resolve(`Exported vault ${sanitizedDomain}`);
+      } catch (error: any) {
+        reject(error?.message || "Failed to Export Data");
       }
-
-      // Sanitize the domain and localStorage keys
-      const sanitizedDomain = sanitizeKey(new URL(tab.url!).hostname);
-      const sanitizedLocalStorage: Record<string, any> = Object.keys(
-        localStorage
-      ).reduce((acc, key) => {
-        acc[sanitizeKey(key)] = localStorage[key];
-        return acc;
-      }, {} as Record<string, any>);
-
-      // Save the vault data to Firestore
-      await setDoc(doc(collection(db, "vaults")), {
-        domain: sanitizedDomain,
-        cookies,
-        localStorage: sanitizedLocalStorage,
-        receipts,
-        imported: [],
-        sharedBy: user?.email,
-      });
-
-      refetch(); // Refetch vaults after exporting
-
-      return `Exported vault ${sanitizedDomain}`;
-    } catch (error: any) {
-      return error?.message || "Failed to Export Data";
-    }
+    });
   };
 
   return (
@@ -173,7 +179,6 @@ const ExportPage = () => {
                     loading: "Exporting Data",
                     success: "Exported Data",
                     error: (error) => {
-                      console.log(error);
                       return error || "Failed to Export Data";
                     },
                   });
