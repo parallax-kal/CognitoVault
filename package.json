@@ -10,7 +10,7 @@
   },
   "description": "CognitoVault: Share site access safely via encrypted vaults. Store, export, & import cookies and local storage securely.",
   "repository": {
-    "url": "https://github.com/the-coder-kalisa/CognitoVault.git",
+    "url": "https://github.com/parallax-kal/CognitoVault.git",
     "type": "git"
   },
   "keywords": [
