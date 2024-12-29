@@ -7,7 +7,6 @@ import { auth, db } from "../lib/firebase";
 import { TagsInput } from "react-tag-input-component";
 import { sanitizeKey, unsanitizeKey } from "../lib/utils";
 import { SyncLoader } from "react-spinners";
-import WebsiteIcon from "../icons/website.svg";
 import { Vault } from "../types/vault";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { pageAtom, selectedVaultAtom, userAtom } from "../lib/atom";
@@ -56,7 +55,8 @@ const ExportPage = () => {
     {
       refetchOnWindowFocus: false,
       refetchOnMount: false,
-      onError: (value: any) => toast.error(value?.message ?? "Error getting exported vaults."),
+      onError: (value: any) =>
+        toast.error(value?.message ?? "Error getting exported vaults."),
     }
   );
 
@@ -78,10 +78,11 @@ const ExportPage = () => {
           currentWindow: true,
         });
 
-        if (!tab.url || tab.url === "chrome://newtab/") {
-          return reject("You're still on new tab.");
+        if (!tab.url || tab.url.startsWith("chrome://")) {
+          return reject(
+            "You can't export the localStorage and cookies from this tab."
+          );
         }
-
 
         const cookies = await chrome.cookies.getAll({ url: tab.url });
 
@@ -203,8 +204,7 @@ const ExportPage = () => {
                     index={index}
                     name={vault.url}
                     desc={`${vault.receipts.length} receipts`}
-                    image={<WebsiteIcon className="w-full h-full" />}
-                    id={vault.url}
+                    id={vault.id}
                     onClick={() => {
                       setSelectedVault({ ...vault, index }); // set vault to be displayed in selectedExport page
                       setPage(8); // navigate to ViewVault page

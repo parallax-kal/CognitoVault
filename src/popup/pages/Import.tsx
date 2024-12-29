@@ -13,7 +13,6 @@ import {
   collection,
 } from "firebase/firestore";
 import { SyncLoader } from "react-spinners";
-import WebsiteIcon from "../icons/website.svg";
 import { unsanitizeKey } from "../lib/utils";
 import { Vault } from "../types/vault";
 import { useRecoilValue, useSetRecoilState } from "recoil";
@@ -81,14 +80,14 @@ const ImportPage = () => {
       });
 
       if (!tab.url) {
-        return toast.error("Can't get the current tab's url")
+        return toast.error("Can't get the current tab's url");
       }
 
       const tabDomain = new URL(tab.url).hostname;
       const vaultDomain = new URL(selectedVault.url).hostname;
 
       if (tabDomain !== vaultDomain) {
-          return toast.error("Please go to the domain you're trying to import.");
+        return toast.error("Please go to the domain you're trying to import.");
       }
 
       await Promise.all(
@@ -172,16 +171,16 @@ const ImportPage = () => {
                         index={index}
                         name={vault.url}
                         desc={`shared by ${vault.sharedBy}`}
-                        image={<WebsiteIcon className="w-full h-full" />}
-                        id={vault.url}
+                        id={vault.id}
                         key={vault.url}
-                        getAdded={(added) => {
-                          if (added) {
-                            // Add vault to selectedVaults
-                            setSelectedVault(vault);
-                          } else {
+                        added={vault.id === selectedVault?.id}
+                        setAdded={() => {
+                          if (selectedVault?.id === vault.id) {
                             // Remove vault from selectedVaults
                             setSelectedVault(undefined);
+                          } else {
+                            // Add vault to selectedVaults
+                            setSelectedVault(vault);
                           }
                         }}
                       />
@@ -214,10 +213,8 @@ const ImportPage = () => {
                         index={index}
                         name={vault.url}
                         desc={`${vault.receipts.length} receipts`}
-                        image={<WebsiteIcon className="w-full h-full" />}
-                        id={vault.url}
+                        id={vault.id}
                         key={vault.url}
-                        getAdded={(added) => {}}
                       />
                     ))
                 ) : (
