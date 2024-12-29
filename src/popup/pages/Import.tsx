@@ -34,8 +34,7 @@ const ImportPage = () => {
   // Query to fetch vaults where the user has receipts but hasn't shared
   const vaultsQuery = query(
     collection(db, "vaults"),
-    where("receipts", "array-contains", user?.email),
-    where("sharedBy", "!=", user?.email)
+    where("receipts", "array-contains", user?.email)
   );
 
   // Fetch vaults using React Query

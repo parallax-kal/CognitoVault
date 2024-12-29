@@ -59,7 +59,7 @@ const ViewVault = () => {
       <div className="flex mb-4 justify-center">
         <Logo />
       </div>
-      
+
       <button onClick={() => setPage(6)}>
         <BackIcon className="h-5 w-5" />
       </button>
@@ -78,11 +78,7 @@ const ViewVault = () => {
             toast.error("Enter valid email.");
             receipts.pop();
           }
-          // Prevent adding user's own email
-          if (newReceipt === auth.currentUser?.email) {
-            toast.error("You cannot add your own email");
-            receipts.pop();
-          }
+
           setReceipts(receipts);
         }}
         name="email"
@@ -92,7 +88,7 @@ const ViewVault = () => {
         }}
         placeHolder="Enter Recepient's Email"
       />
-      
+
       <div className="flex items-center gap-4 justify-end mt-4">
         <PrimaryButton
           title="Delete"

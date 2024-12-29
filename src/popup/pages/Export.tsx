@@ -159,10 +159,6 @@ const ExportPage = () => {
                   toast.error("Enter valid email.");
                   receipts.pop();
                 }
-                if (newReceipt === auth.currentUser?.email) {
-                  toast.error("You cannot add your own email");
-                  receipts.pop();
-                }
                 setReceipts(receipts);
               }}
               name="email"
