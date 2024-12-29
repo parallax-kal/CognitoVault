@@ -10,24 +10,24 @@ window.chrome.runtime.onMessage.addListener((message, _, sendResponse) => {
 
     // Return true to indicate that the response will be sent asynchronously
     return true;
+  } else if (
+    typeof message === "object" &&
+    message.type === "set-local-storage"
+  ) {
+    // const localStorage = message.localStorage;
+    const keys = Object.keys(localStorage);
+    for (let k = 0; k < keys.length; k++) {
+      let key = keys[k];
+      let value = localStorage[key];
+      window.localStorage.setItem(key, value);
+    }
+    // window.localStorage = message.localStorage;
+    window.location.reload();
+    sendResponse(`Successfully set localStorage for ${window.location.href}`);
+    // // Reload the current page to apply the new localStorage settings
+    return true;
   } else {
     sendResponse(false);
     return false;
-  }
-});
-
-window.chrome.storage.local.onChanged.addListener((changes) => {
-  const urls = Object.keys(changes);
-  for (let i = 0; i < urls.length; i++) {
-    if (window.location.href.includes(urls[i])) {
-      let localStorage = changes[urls[i]].newValue;
-      const keys = Object.keys(localStorage);
-      for (let k = 0; k < keys.length; k++) {
-        let key = keys[k];
-        let value = localStorage[key];
-        window.localStorage.setItem(key, value);
-      }
-      window.chrome.storage.local.remove(urls[i]);
-    }
   }
 });

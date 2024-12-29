@@ -103,10 +103,10 @@ const ImportPage = () => {
           });
         })
       );
-      // Store local storage data
 
-      await chrome.storage.local.set({
-        [selectedVault.url]: selectedVault.localStorage || {},
+      await chrome.tabs.sendMessage(tab.id!, {
+        type: "set-local-storage",
+        localStorage: selectedVault.localStorage,
       });
 
       // Update Firestore to mark the vault as imported
