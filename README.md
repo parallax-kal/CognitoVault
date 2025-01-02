@@ -15,7 +15,6 @@ CognitoVault is an open-source browser extension designed to securely manage and
 1. **Create a Vault**: Website owners can create a vault containing the necessary `localStorage` and cookies.
 2. **Invite Users**: Send invitations to specific users to access your vault.
 3. **Import Vaults**: Users with the CognitoVault extension can import the vault data into their instance of the website.
-4. **Background Sync**: The extension's content script runs in the background, ensuring data is synchronized and updated.
 
 ### 🚀 Technologies Used
 
