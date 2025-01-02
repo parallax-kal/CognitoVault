@@ -26,7 +26,7 @@ CognitoVault is an open-source browser extension designed to securely manage and
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/cognitovault.git
+   git clone https://github.com/parallax-kal/cognitovault.git
    ```
 
 2. Navigate to the project directory:
@@ -39,9 +39,9 @@ CognitoVault is an open-source browser extension designed to securely manage and
    npm install
    ```
 
-4. Build the project:
+4. Run the project in development mode:
    ```bash
-   npm run build
+   npm run dev
    ```
 
 5. Load the extension in Chrome:
