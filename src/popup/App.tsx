@@ -16,10 +16,11 @@ import { signOut } from "firebase/auth/web-extension";
 import Settings from "./pages/Settings";
 import { doc, getDoc } from "firebase/firestore";
 import ViewVault from "./pages/ViewVault";
+import { cn } from "./lib/utils";
 
 function App() {
   // State to keep track of the current page and user information
-  const [page, setPage] = useRecoilState(pageAtom);
+  const [currentPage, setCurrentPage] = useRecoilState(pageAtom);
   const setUser = useSetRecoilState(userAtom);
 
   // Array of components to render based on the current page index
@@ -29,12 +30,14 @@ function App() {
     <Signup />,
     <ForgotPassword />,
     <HomePage />,
-    <ImportPage />,
-    <ExportPage />,
     <Settings />,
-    <ViewVault />,
   ];
 
+  const authorizedPages = [
+    <ImportPage />,
+    <ExportPage />,
+    <ViewVault />,
+  ];
   // State to control the visibility of the navigation menu
   const [showingNav, setShowingNav] = useState(false);
 
@@ -42,32 +45,40 @@ function App() {
   useEffect(() => {
     // Listen for authentication state changes
     onAuthStateChanged(auth, async (firebaseUser) => {
-      // Check if the user is authenticated and email is verified
-      if (firebaseUser?.emailVerified) {
-        const user = JSON.parse(JSON.stringify(firebaseUser));
-        if (user) {
-          // Fetch user data from Firestore
-          const userDatasnapshot = await getDoc(
-            doc(db, "users", firebaseUser!.uid)
-          );
-          if (userDatasnapshot.exists()) {
-            // Extract user details and update state
-            const { fullname, username, email } = userDatasnapshot.data();
-            setUser({
-              ...user,
-              fullname,
-              username,
-            });
-            setPage(4); // Navigate to the HomePage (index 4)
-            return;
+      if (firebaseUser === null) {
+        setCurrentPage(0);
+      }
+      try {
+        // Check if the user is authenticated and email is verified
+        if (firebaseUser?.emailVerified) {
+          const user = JSON.parse(JSON.stringify(firebaseUser));
+          if (user) {
+            // Fetch user data from Firestore
+            const userDatasnapshot = await getDoc(
+              doc(db, "users", firebaseUser!.uid)
+            );
+            if (userDatasnapshot.exists()) {
+              // Extract user details and update state
+              const { fullname, username, email } = userDatasnapshot.data();
+              setUser({
+                ...user,
+                fullname,
+                username,
+              });
+              setCurrentPage(4); // Navigate to the HomePage (index 4)
+              return;
+            } else {
+              setCurrentPage(0);
+            }
+          } else {
+            setCurrentPage(0);
           }
         }
+      } catch (error) {
+        setCurrentPage(0);
       }
-      // Redirect to the Landing page if not authenticated
-      setPage(0);
     });
   }, []);
-
 
   return (
     <div
@@ -77,7 +88,7 @@ function App() {
       }}
       className="w-[400px] overflow-y-auto overflow-x-hidden flex relative flex-col h-[500px] bg-gray-900  items-center justify-center"
     >
-      {page > 3 && (
+      {currentPage > 3 && (
         <div className=" absolute top-2 right-4 flex flex-col items-end gap-2">
           <button
             onClick={() => {
@@ -95,7 +106,7 @@ function App() {
               <button
                 onClick={() => {
                   // Navigate to the Settings page
-                  setPage(7);
+                  setCurrentPage(5);
                 }}
                 className="py-1 px-4 hover:bg-blue-400 rounded-b-md hover:text-white w-full text-left"
               >
@@ -105,7 +116,7 @@ function App() {
                 onClick={async () => {
                   // Sign out the user and navigate to the Login page
                   await signOut(auth);
-                  setPage(1);
+                  setCurrentPage(1);
                   setUser(null);
                 }}
                 className="py-1 px-4 hover:bg-blue-400 rounded-b-md hover:text-white w-full text-left"
@@ -116,7 +127,21 @@ function App() {
           )}
         </div>
       )}
-      {page === -1 ? <SyncLoader color="white" /> : pages[page]}
+
+      {currentPage > 5 && authorizedPages[currentPage - 6]}
+
+      {currentPage === -1 && <SyncLoader color="white" />}
+
+      {pages.map((page, index) => (
+        <div
+          key={index}
+          className={cn("w-full", {
+            "hidden h-0 w-0": index !== currentPage,
+          })}
+        >
+          {page}
+        </div>
+      ))}
     </div>
   );
 }

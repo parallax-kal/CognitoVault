@@ -13,15 +13,18 @@ import Logo from "@/components/common/Logo";
 const ViewVault = () => {
   // Recoil state management for selected vault and page navigation
   const [selectedVault, setSelectedVault] = useRecoilState(selectedVaultAtom);
-  const [receipts, setReceipts] = useState(selectedVault!.receipts);
+  const [receipts, setReceipts] = useState(selectedVault?.receipts ?? []);
   const setPage = useSetRecoilState(pageAtom);
   const [isEdited, setIsEdited] = useState(false);
 
   // Effect to detect changes in receipts and update the edited state
   useEffect(() => {
-    const receiptsChanged = !compareReceipts(receipts, selectedVault!.receipts);
+    const receiptsChanged = !compareReceipts(
+      receipts,
+      selectedVault?.receipts ?? []
+    );
     setIsEdited(receiptsChanged);
-  }, [receipts, selectedVault!.receipts]);
+  }, [receipts, selectedVault?.receipts]);
 
   // Function to compare two arrays of receipts
   const compareReceipts = (a: string[], b: string[]) => {
@@ -54,7 +57,7 @@ const ViewVault = () => {
     }
   };
 
-  return (
+  return !selectedVault ? null : (
     <div className="h-full px-6 pt-16 w-full text-white flex flex-col">
       <div className="flex mb-4 justify-center">
         <Logo />
@@ -65,8 +68,8 @@ const ViewVault = () => {
       </button>
 
       <p className="text-xl my-4">
-        {selectedVault!.index + 1}.{" "}
-        {`https://${unsanitizeKey(selectedVault!.domain)}`}
+        {selectedVault.index + 1}.{" "}
+        {`https://${unsanitizeKey(selectedVault.domain)}`}
       </p>
 
       <TagsInput

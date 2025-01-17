@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/form";
 import PrimaryButton from "@/components/common/primary-button";
 import { doc, updateDoc } from "firebase/firestore";
+import { useEffect } from "react";
 
 // Schema for form validation using Zod
 const settingsSchema = z
@@ -53,6 +54,13 @@ const Settings = () => {
     },
   });
 
+  useEffect(() => {
+    if (user) {
+      form.setValue("email", user.email ?? "");
+      form.setValue("fullname", user.fullname ?? "");
+      form.setValue("username", user.username ?? "");
+    }
+  }, [user]);
   // Function to update user data in Firebase and local state
   const updateUserData = async (values: z.infer<typeof settingsSchema>) => {
     try {

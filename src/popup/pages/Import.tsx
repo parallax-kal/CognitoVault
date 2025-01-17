@@ -152,7 +152,7 @@ const ImportPage = () => {
           <TabsTrigger value="imported">Imported</TabsTrigger>
         </TabsList>
 
-        <div className="w-full p-4 text-white">
+        <div className="w-full p-4 relative text-white">
           {isLoading ? (
             <div className="flex h-[18rem] items-center justify-center">
               <SyncLoader color="#0C21C1" />
@@ -193,7 +193,7 @@ const ImportPage = () => {
                 <PrimaryButton
                   title="Import"
                   disabled={!selectedVault} // Disable button if no vaults selected
-                  className="w-[7rem] right-0 absolute bottom-0"
+                  className="w-[7rem] right-0 absolute -top-3"
                   onClick={async () => {
                     await importVault();
                   }}
