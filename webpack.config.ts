@@ -82,7 +82,7 @@ export default (env: Env): Configuration => {
     // Output configuration
     output: {
       filename: "[name].js", // Output filename template for chunks
-      path: path.resolve(__dirname, "dist"), // Output directory
+      path: path.resolve(__dirname, "cognitovault"), // Output directory
     },
     
     // Optimization settings
