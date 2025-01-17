@@ -3,7 +3,7 @@ import BackIcon from "../icons/back.svg";
 import VaultBox from "../components/common/vault-box";
 import { useQuery } from "react-query";
 import toast from "react-hot-toast";
-import { auth, db } from "../lib/firebase";
+import { db } from "../lib/firebase";
 import { TagsInput } from "react-tag-input-component";
 import { sanitizeKey, unsanitizeKey } from "../lib/utils";
 import { SyncLoader } from "react-spinners";
@@ -189,7 +189,7 @@ const ExportPage = () => {
             value="exported"
             className="flex h-full flex-col relative mt-0"
           >
-            <div className="h-[21rem]">
+            <div className="h-[21rem] overflow-x-hidden overflow-y-auto">
               {isLoading ? (
                 <div className="flex h-full items-center justify-center">
                   <SyncLoader color="#0C21C1" />

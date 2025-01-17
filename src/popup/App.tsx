@@ -33,51 +33,53 @@ function App() {
     <Settings />,
   ];
 
-  const authorizedPages = [
-    <ImportPage />,
-    <ExportPage />,
-    <ViewVault />,
-  ];
+  const authorizedPages = [<ImportPage />, <ExportPage />, <ViewVault />];
   // State to control the visibility of the navigation menu
   const [showingNav, setShowingNav] = useState(false);
 
   // Effect to handle authentication state changes
   useEffect(() => {
     // Listen for authentication state changes
-    onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser === null) {
-        setCurrentPage(0);
-      }
-      try {
-        // Check if the user is authenticated and email is verified
-        if (firebaseUser?.emailVerified) {
-          const user = JSON.parse(JSON.stringify(firebaseUser));
-          if (user) {
-            // Fetch user data from Firestore
-            const userDatasnapshot = await getDoc(
-              doc(db, "users", firebaseUser!.uid)
-            );
-            if (userDatasnapshot.exists()) {
-              // Extract user details and update state
-              const { fullname, username, email } = userDatasnapshot.data();
-              setUser({
-                ...user,
-                fullname,
-                username,
-              });
-              setCurrentPage(4); // Navigate to the HomePage (index 4)
-              return;
+    onAuthStateChanged(
+      auth,
+      async (firebaseUser) => {
+        if (firebaseUser === null) {
+          setCurrentPage(0);
+        }
+        try {
+          // Check if the user is authenticated and email is verified
+          if (firebaseUser?.emailVerified) {
+            const user = JSON.parse(JSON.stringify(firebaseUser));
+            if (user) {
+              // Fetch user data from Firestore
+              const userDatasnapshot = await getDoc(
+                doc(db, "users", firebaseUser!.uid)
+              );
+              if (userDatasnapshot.exists()) {
+                // Extract user details and update state
+                const { fullname, username, email } = userDatasnapshot.data();
+                setUser({
+                  ...user,
+                  fullname,
+                  username,
+                });
+                setCurrentPage(4); // Navigate to the HomePage (index 4)
+                return;
+              } else {
+                setCurrentPage(0);
+              }
             } else {
               setCurrentPage(0);
             }
-          } else {
-            setCurrentPage(0);
           }
+        } catch (error) {
+          setCurrentPage(0);
         }
-      } catch (error) {
+      },
+      () => {
         setCurrentPage(0);
       }
-    });
+    );
   }, []);
 
   return (
@@ -86,7 +88,7 @@ function App() {
         // Hide the navigation menu when clicking outside
         setShowingNav(false);
       }}
-      className="w-[400px] overflow-y-auto overflow-x-hidden flex relative flex-col h-[500px] bg-gray-900  items-center justify-center"
+      className="w-[400px] overflow-x-hidden flex relative flex-col h-[500px] bg-gray-900  items-center justify-center"
     >
       {currentPage > 3 && (
         <div className=" absolute top-2 right-4 flex flex-col items-end gap-2">

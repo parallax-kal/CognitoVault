@@ -24,13 +24,13 @@ const HomePage = () => {
         <PrimaryButton
           title="Import"
           onClick={() => {
-            setPage(5); // navigate to import page
+            setPage(6); // navigate to import page
           }}
         />
         <PrimaryButton
           title="Export"
           onClick={() => {
-            setPage(6); // navigate to export page
+            setPage(7); // navigate to export page
           }}
         />
       </div>

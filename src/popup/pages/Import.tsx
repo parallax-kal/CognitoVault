@@ -13,7 +13,7 @@ import {
   collection,
 } from "firebase/firestore";
 import { SyncLoader } from "react-spinners";
-import { unsanitizeKey } from "../lib/utils";
+import { cn, unsanitizeKey } from "../lib/utils";
 import { Vault } from "../types/vault";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { pageAtom, userAtom } from "../lib/atom";
@@ -163,7 +163,7 @@ const ImportPage = () => {
                 value="import"
                 className="flex right-0 flex-col relative"
               >
-                <div className="h-[21rem]">
+                <div className="h-[21rem] overflow-y-auto overflow-x-hidden">
                   {Number(notImported?.length) > 0 ? (
                     notImported.map((vault, index) => (
                       <VaultBox
@@ -192,8 +192,9 @@ const ImportPage = () => {
                 </div>
                 <PrimaryButton
                   title="Import"
-                  disabled={!selectedVault} // Disable button if no vaults selected
-                  className="w-[7rem] right-0 absolute -top-3"
+                  className={cn("w-[7rem] left-0 absolute bottom-3", {
+                    hidden: !selectedVault,
+                  })}
                   onClick={async () => {
                     await importVault();
                   }}
@@ -202,11 +203,10 @@ const ImportPage = () => {
 
               <TabsContent
                 value="imported"
-                className="flex h-full overflow-y-auto flex-col"
+                className="flex h-[21rem] overflow-y-auto overflow-x-hidden flex-col"
               >
                 {Number(imported?.length) > 0 ? (
                   imported
-                    ?.filter((item) => item)
                     .map((vault, index) => (
                       <VaultBox
                         index={index}
